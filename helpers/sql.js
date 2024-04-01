@@ -1,14 +1,24 @@
 const { BadRequestError } = require("../expressError");
 
-// THIS NEEDS SOME GREAT DOCUMENTATION.
+/**
+ * Converts JavaScript data to be updated into SQL-compatible format for partial updates.
+ *
+ * @param {Object} dataToUpdate - Data to be updated.
+ * @param {Object} jsToSql - Mapping object specifying SQL-equivalent keys for JavaScript keys.
+ * @returns {Object} - An object containing SQL-ready set clause and corresponding values.
+ * @throws {BadRequestError} - If no data to update is provided.
+ *
+ * @example
+ * // Returns { setCols: 'first_name=$1, last_name=$2', values: ['John', 'Doe'] }
+ * sqlForPartialUpdate({ firstName: 'John', lastName: 'Doe' }, { firstName: 'first_name', lastName: 'last_name' });
+ */
 
 function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   const keys = Object.keys(dataToUpdate);
   if (keys.length === 0) throw new BadRequestError("No data");
 
-  // {firstName: 'Aliya', age: 32} => ['"first_name"=$1', '"age"=$2']
-  const cols = keys.map((colName, idx) =>
-      `"${jsToSql[colName] || colName}"=$${idx + 1}`,
+  const cols = keys.map(
+    (colName, idx) => `"${jsToSql[colName] || colName}"=$${idx + 1}`
   );
 
   return {
