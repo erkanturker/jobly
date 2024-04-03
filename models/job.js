@@ -41,8 +41,6 @@ class Job {
 
     const job = result.rows[0];
 
-    console.log(job);
-
     return job;
   }
 

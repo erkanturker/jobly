@@ -73,6 +73,18 @@ async function commonBeforeAll() {
     equity: "0.002",
     companyHandle: "c1",
   });
+  await Job.create({
+    title: "Business Analyst",
+    salary: 6000,
+    equity: "0",
+    companyHandle: "c2",
+  });
+  await Job.create({
+    title: "Sofware Engineer",
+    salary: 9000,
+    equity: "0.23",
+    companyHandle: "c2",
+  });
 }
 
 async function commonBeforeEach() {
