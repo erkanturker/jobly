@@ -18,7 +18,7 @@ router.post("/", [ensureLoggedIn, ensureAdmin], async (req, res, next) => {
     }
     const newJob = await Job.create(req.body);
     console.log(newJob);
-    return res.json({ job: newJob });
+    return res.status(201).json({ job: newJob });
   } catch (error) {
     return next(error);
   }
