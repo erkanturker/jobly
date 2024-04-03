@@ -7,6 +7,7 @@ const newJobSchema = require("../schemas/jobNew.json");
 const jobFilterSchema = require("../schemas/jobFilter.json");
 const jsonschema = require("jsonschema");
 const { BadRequestError } = require("../expressError");
+const { route } = require("./users");
 
 const router = express.Router();
 
@@ -41,6 +42,15 @@ router.get("/", async (req, res, next) => {
     }
     const jobs = await Job.findAll({ title, minSalary, hasEquity });
     return res.json({ jobs });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get("/:id", async (req, res, next) => {
+  try {
+    const job = await Job.get(req.params.id);
+    return res.json({ job });
   } catch (error) {
     return next(error);
   }

@@ -44,6 +44,16 @@ class Job {
     return job;
   }
 
+  /**
+   * Find All Jobs
+   * This method retrieves all jobs from the database with optional filtering based on title, minimum salary, and whether the job has equity.
+   * @param {object} options - Filtering criteria.
+   * @param {string} options.title - Title of the job to filter by (case-insensitive).
+   * @param {number} options.minSalary - Minimum salary of the job to filter by.
+   * @param {boolean} options.hasEquity - Indicates whether the job must have equity.
+   * @returns {Array} - Filtered list of jobs.
+   */
+
   static async findAll({ title, minSalary, hasEquity }) {
     const jobs = await db.query(
       `SELECT title,
@@ -66,6 +76,32 @@ class Job {
     });
 
     return filteredJobs;
+  }
+
+  /**
+   * Retrieve a Job by ID
+   * This method retrieves a job from the database based on the provided id.
+   * @param {int} id - The id  of the job to retrieve.
+   * @returns {object} - The job object containing title, salary, equity, and companyHandle.
+   * @throws {NotFoundError} - If no job with the provided title is found in the database.
+   */
+
+  static async get(id) {
+    const jobRes = await db.query(
+      `SELECT id,
+              title,
+              salary, 
+              equity,
+              company_handle AS "companyHandle"
+        FROM jobs 
+        WHERE id=$1 `,
+      [id]
+    );
+
+    const job = jobRes.rows[0];
+    if (!job) throw new NotFoundError(`No Job:${id} is found`);
+
+    return job;
   }
 }
 

@@ -7,6 +7,7 @@ const {
   commonAfterEach,
   commonAfterAll,
 } = require("./_testCommon");
+const { request } = require("../app.js");
 
 beforeAll(commonBeforeAll);
 beforeEach(commonBeforeEach);
@@ -111,5 +112,31 @@ describe("get", () => {
         companyHandle: "c2",
       },
     ]);
+  });
+});
+
+describe("GET /jobs/:title", () => {
+  test("should first job by title", async () => {
+    const result = await db.query(
+      `SELECT id from JOBS WHERE title='Software Engineer'`
+    );
+
+    const id = result.rows[0].id;
+    const job = await Job.get(id);
+    expect(job).toEqual({
+      id,
+      title: "Software Engineer",
+      salary: 110000,
+      equity: "0.02",
+      companyHandle: "c2",
+    });
+  });
+
+  test("should first get not found", async () => {
+    try {
+      await Job.get(121212);
+    } catch (error) {
+      expect(error instanceof NotFoundError).toBeTruthy();
+    }
   });
 });

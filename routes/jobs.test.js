@@ -128,3 +128,14 @@ describe("GET /jobs", () => {
     expect(resp.statusCode).toBe(400);
   });
 });
+
+describe("GET /jobs/:id", () => {
+  test("should get job by id", async () => {
+    const result = await db.query(
+      `SELECT id from JOBS WHERE title='Sofware Engineer'`
+    );
+    const id = result.rows[0].id;
+    const resp = await request(app).get(`/jobs/${id}`);
+    expect(resp.statusCode).toBe(200);
+  });
+});
