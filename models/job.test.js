@@ -115,7 +115,7 @@ describe("get", () => {
   });
 });
 
-describe("GET /jobs/:title", () => {
+describe("should get job by id", () => {
   test("should first job by title", async () => {
     const result = await db.query(
       `SELECT id from JOBS WHERE title='Software Engineer'`
@@ -137,6 +137,40 @@ describe("GET /jobs/:title", () => {
       await Job.get(121212);
     } catch (error) {
       expect(error instanceof NotFoundError).toBeTruthy();
+    }
+  });
+});
+
+describe("update", () => {
+  test("should update", async () => {
+    const result = await db.query(
+      `SELECT id from JOBS WHERE title='Software Engineer'`
+    );
+    const id = result.rows[0].id;
+    const updateData = {
+      title: "Developer",
+      salary: 10000,
+      equity: "0",
+      companyHandle: "c1",
+    };
+
+    let job = await Job.update(id, updateData);
+    expect(job).toEqual({ id, ...updateData });
+  });
+  test("should not found if no id found", async () => {
+    try {
+      await Job.update("123123", { title: "test" });
+      fail();
+    } catch (error) {
+      expect(error instanceof NotFoundError).toBeTruthy();
+    }
+  });
+  test("should get bad request", async () => {
+    try {
+      await Job.update("123123", {});
+      fail();
+    } catch (error) {
+      expect(error instanceof BadRequestError).toBeTruthy();
     }
   });
 });

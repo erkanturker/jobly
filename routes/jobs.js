@@ -5,6 +5,7 @@ const Job = require("../models/job");
 const { ensureLoggedIn, ensureAdmin } = require("../middleware/auth");
 const newJobSchema = require("../schemas/jobNew.json");
 const jobFilterSchema = require("../schemas/jobFilter.json");
+const jobUpdateSchema = require("../schemas/jobUpdate.json");
 const jsonschema = require("jsonschema");
 const { BadRequestError } = require("../expressError");
 const { route } = require("./users");
@@ -51,6 +52,24 @@ router.get("/:id", async (req, res, next) => {
   try {
     const job = await Job.get(req.params.id);
     return res.json({ job });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.patch("/:id", [ensureLoggedIn, ensureAdmin], async (req, res, next) => {
+  try {
+    const validator = jsonschema.validate(req.body, jobUpdateSchema);
+
+    if (!validator.valid) {
+      const errList = validator.errors.map((e) => e.stack);
+      throw new BadRequestError(errList);
+    }
+
+    const job = await Job.update(req.params.id, req.body);
+
+    return res.json({ job });
+    
   } catch (error) {
     return next(error);
   }

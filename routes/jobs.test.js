@@ -139,3 +139,69 @@ describe("GET /jobs/:id", () => {
     expect(resp.statusCode).toBe(200);
   });
 });
+
+describe("PATCH /jobs/:id", () => {
+  const updateData = {
+    title: "Developer",
+    salary: 12222,
+    equity: 0.2,
+    companyHandle: "c2",
+  };
+
+  test("should update", async () => {
+    const result = await db.query(
+      `SELECT id from JOBS WHERE title='Sofware Engineer'`
+    );
+    const id = result.rows[0].id;
+
+    const resp = await request(app)
+      .patch(`/jobs/${id}`)
+      .send(updateData)
+      .set("authorization", `${adminToken}`);
+
+    updateData.equity = updateData.equity.toString();
+
+    expect(resp.statusCode).toBe(200);
+    expect(resp.body).toEqual({ job: { id, ...updateData } });
+  });
+
+  test("should forbidden error user is not admin", async () => {
+    const resp = await request(app)
+      .patch(`/jobs/1`)
+      .send(updateData)
+      .set("authorization", `${u1Token}`);
+
+    expect(resp.statusCode).toBe(403);
+  });
+
+  test("should unauthorized error user is not logged in", async () => {
+    const resp = await request(app)
+      .patch(`/jobs/1`)
+      .send({ ...updateData, equity: 0.2 });
+
+    expect(resp.statusCode).toBe(401);
+  });
+
+  test("should get not found error", async () => {
+    const resp = await request(app)
+      .patch(`/jobs/1231`)
+      .send({ title: "Update" })
+      .set("authorization", `${adminToken}`);
+
+    expect(resp.statusCode).toBe(404);
+  });
+
+  test("should get bad request error", async () => {
+    const result = await db.query(
+      `SELECT id from JOBS WHERE title='Sofware Engineer'`
+    );
+    const id = result.rows[0].id;
+    updateData.title = "";
+    const resp = await request(app)
+      .patch(`/jobs/${id}`)
+      .send(updateData)
+      .set("authorization", `${adminToken}`);
+      
+    expect(resp.statusCode).toBe(400);
+  });
+});
