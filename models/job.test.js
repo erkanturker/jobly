@@ -55,3 +55,61 @@ describe("create", () => {
     }
   });
 });
+
+describe("get", () => {
+  test("should get all jobs", async () => {
+    const result = await Job.findAll({});
+    expect(result).toEqual([
+      {
+        title: "Mechanic Engineer",
+        salary: 70000,
+        equity: "0.01",
+        companyHandle: "c3",
+      },
+      {
+        title: "Qaulity Assurance",
+        salary: 100000,
+        equity: "0",
+        companyHandle: "c1",
+      },
+      {
+        title: "Software Engineer",
+        salary: 110000,
+        equity: "0.02",
+        companyHandle: "c2",
+      },
+    ]);
+  });
+  test("should filter by name", async () => {
+    const result = await Job.findAll({ title: "engineer" });
+    expect(result).toEqual([
+      {
+        title: "Mechanic Engineer",
+        salary: 70000,
+        equity: "0.01",
+        companyHandle: "c3",
+      },
+      {
+        title: "Software Engineer",
+        salary: 110000,
+        equity: "0.02",
+        companyHandle: "c2",
+      },
+    ]);
+  });
+  test("should filter by name, salary and has equity", async () => {
+    const result = await Job.findAll({
+      title: "engineer",
+      minSalary: 100000,
+      hasEquity: true,
+    });
+    expect(result).toEqual([
+      {
+        title: "Software Engineer",
+        salary: 110000,
+        equity: "0.02",
+        companyHandle: "c2",
+      },
+    ]);
+  });
+});

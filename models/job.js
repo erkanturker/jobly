@@ -45,6 +45,30 @@ class Job {
 
     return job;
   }
+
+  static async findAll({ title, minSalary, hasEquity }) {
+    const jobs = await db.query(
+      `SELECT title,
+        salary, 
+        equity,
+        company_handle AS "companyHandle"
+      FROM jobs 
+      ORDER BY title`
+    );
+
+    const filteredJobs = jobs.rows.filter((job) => {
+      const titleCheck =
+        !title || job.title.toLowerCase().includes(title.toLowerCase());
+
+      const minSalaryCheck = !minSalary || job.salary > minSalary;
+
+      const checkHasEquity = !hasEquity || job.equity > 0;
+
+      return titleCheck && minSalaryCheck && checkHasEquity;
+    });
+
+    return filteredJobs;
+  }
 }
 
 module.exports = Job;
