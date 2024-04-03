@@ -105,6 +105,15 @@ class Job {
     return job;
   }
 
+  /**
+   * Update a Job by ID
+   * This method updates a job in the database with the provided data based on the specified ID.
+   * @param {number} id - The ID of the job to update.
+   * @param {object} data - The data containing fields to update in the job.
+   * @returns {object} - The updated job object containing id, title, salary, equity, and companyHandle.
+   * @throws {NotFoundError} - If no job with the provided ID is found in the database.
+   */
+
   static async update(id, data) {
     const { setCols, values } = sqlForPartialUpdate(data, {
       companyHandle: "company_handle",
@@ -125,6 +134,24 @@ class Job {
     if (!company) throw new NotFoundError(`No company: ${id}`);
 
     return company;
+  }
+
+  /**
+   * Remove a Job by ID
+   * This method removes a job from the database based on the specified ID.
+   * @param {number} id - The ID of the job to remove.
+   * @throws {NotFoundError} - If no job with the provided ID is found in the database.
+   */
+  
+  static async remove(id) {
+    const result = await db.query(
+      `DELETE FROM jobs
+        WHERE id=$1
+        RETURNING id`,
+      [id]
+    );
+    const job = result.rows[0];
+    if (!job) throw new NotFoundError(`No Job with id:${id}`);
   }
 }
 

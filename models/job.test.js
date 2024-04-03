@@ -174,3 +174,27 @@ describe("update", () => {
     }
   });
 });
+
+describe("remove", () => {
+  test("should remove with id", async () => {
+    const result = await db.query(
+      `SELECT id from jobs WHERE title='Software Engineer'`
+    );
+    const id = result.rows[0].id;
+
+    await Job.remove(id);
+
+    const isRemove = await db.query(
+      `SELECT id from jobs WHERE title='Software Engineer'`
+    );
+
+    expect(isRemove.rows.length).toBe(0);
+  });
+  test("should get not found", async () => {
+    try {
+      await Job.remove(1221);
+    } catch (error) {
+      expect(error instanceof NotFoundError).toBeTruthy();
+    }
+  });
+});

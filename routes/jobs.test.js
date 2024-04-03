@@ -196,12 +196,55 @@ describe("PATCH /jobs/:id", () => {
       `SELECT id from JOBS WHERE title='Sofware Engineer'`
     );
     const id = result.rows[0].id;
+
     updateData.title = "";
+
     const resp = await request(app)
       .patch(`/jobs/${id}`)
       .send(updateData)
       .set("authorization", `${adminToken}`);
-      
+
     expect(resp.statusCode).toBe(400);
+  });
+});
+
+describe("DELETE /jobs/:id", () => {
+  test("should first", async () => {
+    const result = await db.query(
+      `SELECT id from JOBS WHERE title='Sofware Engineer'`
+    );
+    const id = result.rows[0].id;
+
+    const resp = await request(app)
+      .delete(`/jobs/${id}`)
+      .set(`authorization`, `${adminToken}`);
+
+    expect(resp.statusCode).toBe(200);
+    expect(resp.body).toEqual({ deleted: `${id}` });
+  });
+
+  test("should get 404 not found", async () => {
+    const id = 123;
+    const resp = await request(app)
+      .delete(`/jobs/${id}`)
+      .set(`authorization`, `${adminToken}`);
+
+    expect(resp.statusCode).toBe(404);
+  });
+
+  test("should get 403 user is not admin", async () => {
+    const id = 123;
+    const resp = await request(app)
+      .delete(`/jobs/${id}`)
+      .set(`authorization`, `${u1Token}`);
+
+    expect(resp.statusCode).toBe(403);
+  });
+
+  test("should get 401 user is not logged in", async () => {
+    const id = 123;
+    const resp = await request(app).delete(`/jobs/${id}`);
+
+    expect(resp.statusCode).toBe(401);
   });
 });

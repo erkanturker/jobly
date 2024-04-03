@@ -69,7 +69,15 @@ router.patch("/:id", [ensureLoggedIn, ensureAdmin], async (req, res, next) => {
     const job = await Job.update(req.params.id, req.body);
 
     return res.json({ job });
-    
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.delete("/:id", [ensureLoggedIn, ensureAdmin], async (req, res, next) => {
+  try {
+    await Job.remove(req.params.id);
+    return res.json({ deleted: req.params.id });
   } catch (error) {
     return next(error);
   }
