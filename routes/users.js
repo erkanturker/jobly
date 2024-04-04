@@ -13,6 +13,8 @@ const {
 const { BadRequestError } = require("../expressError");
 const User = require("../models/user");
 const { createToken } = require("../helpers/tokens");
+const randomPassword = require("../helpers/generatePassword");
+
 const userNewSchema = require("../schemas/userNew.json");
 const userUpdateSchema = require("../schemas/userUpdate.json");
 
@@ -41,7 +43,11 @@ router.post(
         throw new BadRequestError(errs);
       }
 
-      const user = await User.register(req.body);
+      const user = await User.register({
+        ...req.body,
+        password: randomPassword,
+      });
+      
       const token = createToken(user);
       return res.status(201).json({ user, token });
     } catch (err) {
