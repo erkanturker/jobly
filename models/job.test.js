@@ -141,6 +141,22 @@ describe("should get job by id", () => {
   });
 });
 
+describe("find by handle", () => {
+  test("should first jobs by handle", async () => {
+    const jobs = await Job.getByHandle("c2");
+
+    expect(jobs).toEqual([
+      {
+        id: expect.any(Number),
+        title: "Software Engineer",
+        salary: 110000,
+        equity: "0.02",
+        companyHandle: "c2",
+      },
+    ]);
+  });
+});
+
 describe("update", () => {
   test("should update", async () => {
     const result = await db.query(

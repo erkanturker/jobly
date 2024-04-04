@@ -178,6 +178,15 @@ describe("GET /companies/:handle", function () {
         numEmployees: 1,
         logoUrl: "http://c1.img",
       },
+      jobs: [
+        {
+          id: expect.any(Number),
+          title: "Product Manager",
+          salary: 10000,
+          equity: "0.002",
+          companyHandle: "c1",
+        },
+      ],
     });
   });
 
@@ -191,6 +200,22 @@ describe("GET /companies/:handle", function () {
         numEmployees: 2,
         logoUrl: "http://c2.img",
       },
+      jobs: [
+        {
+          id: expect.any(Number),
+          title: "Business Analyst",
+          salary: 6000,
+          equity: "0",
+          companyHandle: "c2",
+        },
+        {
+          id: expect.any(Number),
+          title: "Sofware Engineer",
+          salary: 9000,
+          equity: "0.23",
+          companyHandle: "c2",
+        },
+      ],
     });
   });
 

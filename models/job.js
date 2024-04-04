@@ -106,6 +106,32 @@ class Job {
   }
 
   /**
+   * Get Jobs by Company Handle
+   * This method retrieves jobs associated with a specified company handle from the database.
+   * @param {string} handle - The handle of the company to retrieve jobs for.
+   * @returns {Array} - An array containing jobs associated with the specified company handle.
+   * @throws {NotFoundError} - If no jobs are found associated with the provided company handle.
+   */
+
+  static async getByHandle(handle) {
+    const jobRes = await db.query(
+      `SELECT id,
+              title,
+              salary, 
+              equity,
+              company_handle AS "companyHandle"
+        FROM jobs 
+        WHERE company_handle=$1 `,
+      [handle]
+    );
+
+    const jobs = jobRes.rows;
+    if (jobs.length === 0) throw new NotFoundError(`No Job:${id} is found`);
+
+    return jobs;
+  }
+
+  /**
    * Update a Job by ID
    * This method updates a job in the database with the provided data based on the specified ID.
    * @param {number} id - The ID of the job to update.
@@ -142,7 +168,7 @@ class Job {
    * @param {number} id - The ID of the job to remove.
    * @throws {NotFoundError} - If no job with the provided ID is found in the database.
    */
-  
+
   static async remove(id) {
     const result = await db.query(
       `DELETE FROM jobs
