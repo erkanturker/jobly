@@ -66,12 +66,13 @@ router.get("/", [ensureLoggedIn, ensureAdmin], async function (req, res, next) {
   }
 });
 
-/** GET /[username] => { user }
+/**
+ * GET /users/:username => { user }
  *
- * Returns { username, firstName, lastName, isAdmin }
+ * Returns user information including username, firstName, lastName, and isAdmin and jobs:[].
  *
  * Authorization required: login
- **/
+ */
 
 router.get(
   "/:username",
@@ -79,7 +80,7 @@ router.get(
   async function (req, res, next) {
     try {
       const user = await User.get(req.params.username);
-      return res.json({ user });
+      return res.json(user);
     } catch (err) {
       return next(err);
     }
@@ -129,6 +130,20 @@ router.delete(
       return res.json({ deleted: req.params.username });
     } catch (err) {
       return next(err);
+    }
+  }
+);
+
+router.post(
+  "/:username/jobs/:jobId",
+  [ensureLoggedIn, ensureSameUserOrAdmin],
+  async (req, res, next) => {
+    const { username, jobId } = req.params;
+    try {
+      const jobAppId = await User.createAppForUser(username, jobId);
+      return res.status(201).json({ applied: jobAppId.jobId });
+    } catch (error) {
+      return next(error);
     }
   }
 );

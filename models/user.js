@@ -8,6 +8,7 @@ const {
   BadRequestError,
   UnauthorizedError,
 } = require("../expressError");
+const Job = require("./job.js");
 
 const { BCRYPT_WORK_FACTOR } = require("../config.js");
 
@@ -114,13 +115,12 @@ class User {
     return result.rows;
   }
 
-  /** Given a username, return data about user.
-   *
-   * Returns { username, first_name, last_name, is_admin, jobs }
-   *   where jobs is { id, title, company_handle, company_name, state }
-   *
-   * Throws NotFoundError if user not found.
-   **/
+/**
+ * Get user information by username, including applied jobs.
+ * @param {string} username - Username of the user to retrieve information for.
+ * @returns {object} - User information, including applied jobs.
+ * @throws {NotFoundError} - Thrown if no user with the provided username is found.
+ */
 
   static async get(username) {
     const userRes = await db.query(
@@ -134,11 +134,20 @@ class User {
       [username]
     );
 
+    const userAppJobs = await db.query(
+      `SELECT app.job_id AS "jobId" 
+        FROM users AS u 
+        JOIN applications AS app
+        ON u.username=app.username
+        WHERE u.username = $1`,
+      [username]
+    );
+
     const user = userRes.rows[0];
 
     if (!user) throw new NotFoundError(`No user: ${username}`);
 
-    return user;
+    return { user, jobs: userAppJobs.rows };
   }
 
   /** Update user data with `data`.
@@ -200,6 +209,30 @@ class User {
     const user = result.rows[0];
 
     if (!user) throw new NotFoundError(`No user: ${username}`);
+  }
+
+  static async createAppForUser(username, jobId) {
+    const user = await this.get(username);
+    const job = await Job.get(jobId);
+
+    const duplicateCheck = await db.query(
+      `SELECT * FROM applications
+       WHERE username=$1 and job_id=$2`,
+      [username, jobId]
+    );
+
+    if (duplicateCheck.rows[0]) {
+      throw new BadRequestError(`You already applied for this JobId:${jobId}`);
+    }
+
+    const result = await db.query(
+      `INSERT INTO applications
+         (username,job_id) VALUES ($1,$2)
+         RETURNING job_id AS "jobId"`,
+      [user.user.username, job.id]
+    );
+
+    return result.rows[0];
   }
 }
 

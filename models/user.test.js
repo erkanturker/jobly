@@ -135,11 +135,14 @@ describe("get", function () {
   test("works", async function () {
     let user = await User.get("u1");
     expect(user).toEqual({
-      username: "u1",
-      firstName: "U1F",
-      lastName: "U1L",
-      email: "u1@email.com",
-      isAdmin: false,
+      user: {
+        username: "u1",
+        firstName: "U1F",
+        lastName: "U1L",
+        email: "u1@email.com",
+        isAdmin: false,
+      },
+      jobs: [{ jobId: expect.any(Number) }],
     });
   });
 
@@ -214,14 +217,60 @@ describe("update", function () {
 describe("remove", function () {
   test("works", async function () {
     await User.remove("u1");
-    const res = await db.query(
-        "SELECT * FROM users WHERE username='u1'");
+    const res = await db.query("SELECT * FROM users WHERE username='u1'");
     expect(res.rows.length).toEqual(0);
   });
 
   test("not found if no such user", async function () {
     try {
       await User.remove("nope");
+      fail();
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+});
+
+/************************************** add job applicaiton */
+
+describe("create job application", () => {
+  test("should create job application", async () => {
+    const job = await db.query(
+      `SELECT id from JOBS WHERE title='Software Engineer'`
+    );
+    const id = job.rows[0].id;
+    const result = await User.createAppForUser("u1", id);
+
+    expect(result.jobId).toBe(id);
+  });
+
+  test("should get bad request ", async () => {
+    const job = await db.query(
+      `SELECT id from JOBS WHERE title='Software Engineer'`
+    );
+    const id = job.rows[0].id;
+    const result = await User.createAppForUser("u1", id);
+    expect(result.jobId).toBe(id);
+
+    try {
+      await User.createAppForUser("u1", id);
+    } catch (err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
+    }
+  });
+
+  test("not found if no such user", async function () {
+    try {
+      await User.createAppForUser("u25", 1);
+      fail();
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+
+  test("not found if no such job", async function () {
+    try {
+      await User.createAppForUser("u1", 1);
       fail();
     } catch (err) {
       expect(err instanceof NotFoundError).toBeTruthy();

@@ -9,9 +9,13 @@ const { createToken } = require("../helpers/tokens");
 
 async function commonBeforeAll() {
   // noinspection SqlWithoutWhere
-  await db.query("DELETE FROM users");
-  // noinspection SqlWithoutWhere
   await db.query("DELETE FROM companies");
+  // noinspection SqlWithoutWhere
+  await db.query("DELETE FROM applications");
+
+  await db.query("DELETE FROM users");
+
+  await db.query("DELETE FROM jobs");
 
   await Company.create({
     handle: "c1",
@@ -85,6 +89,18 @@ async function commonBeforeAll() {
     equity: "0.23",
     companyHandle: "c2",
   });
+
+  const result = await db.query(
+    `SELECT id from jobs WHERE title='Sofware Engineer'`
+  );
+
+  let jobId = result.rows[0].id;
+
+  await db.query(`INSERT INTO applications
+      (username,job_id)
+      VALUES
+      ('u1','${jobId}'),
+      ('u2','${jobId}')`);
 }
 
 async function commonBeforeEach() {

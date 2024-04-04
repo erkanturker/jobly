@@ -206,6 +206,7 @@ describe("GET /users/:username", function () {
         email: "user1@user.com",
         isAdmin: false,
       },
+      jobs: [{ jobId: expect.any(Number) }],
     });
   });
 

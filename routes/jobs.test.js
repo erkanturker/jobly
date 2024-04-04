@@ -248,3 +248,33 @@ describe("DELETE /jobs/:id", () => {
     expect(resp.statusCode).toBe(401);
   });
 });
+
+describe("POST /users/:username/jobs/:jobId", () => {
+  test("should first create an application", async () => {
+    const result = await db.query(
+      `SELECT id from JOBS WHERE title='Business Analyst'`
+    );
+    let jobId = result.rows[0].id;
+
+    const resp = await request(app)
+      .post(`/users/u1/jobs/${jobId}`)
+      .set("authorization", u1Token);
+
+    expect(resp.statusCode).toBe(201);
+    expect(resp.body).toEqual({ applied: jobId });
+  });
+
+  test("should get 401 unathorized error", async () => {
+    const resp = await request(app).post(`/users/u1/jobs/1`);
+
+    expect(resp.statusCode).toBe(401);
+  });
+
+  test("should get 401 unathorized error", async () => {
+    const resp = await request(app)
+      .post(`/users/u2/jobs/1`)
+      .set("authorization", u1Token);
+
+    expect(resp.statusCode).toBe(403);
+  });
+});
