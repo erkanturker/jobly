@@ -57,12 +57,14 @@ class Job {
 
   static async findAll({ title, minSalary, hasEquity }) {
     const jobs = await db.query(
-      `SELECT title,
-        salary, 
-        equity,
-        company_handle AS "companyHandle"
-      FROM jobs 
-      ORDER BY title`
+      `SELECT j.id,
+      j.title,
+      j.salary,
+      j.equity,
+      j.company_handle AS "companyHandle",
+      c.name AS "companyName"
+      FROM jobs j 
+      LEFT JOIN companies AS c ON c.handle = j.company_handle  ORDER BY j.title;`
     );
 
     const filteredJobs = jobs.rows.filter((job) => {
@@ -95,7 +97,8 @@ class Job {
               equity,
               company_handle AS "companyHandle"
         FROM jobs 
-        WHERE id=$1 `,
+        WHERE id=$1
+        ORDER BY title ASC;`,
       [id]
     );
 

@@ -115,12 +115,12 @@ class User {
     return result.rows;
   }
 
-/**
- * Get user information by username, including applied jobs.
- * @param {string} username - Username of the user to retrieve information for.
- * @returns {object} - User information, including applied jobs.
- * @throws {NotFoundError} - Thrown if no user with the provided username is found.
- */
+  /**
+   * Get user information by username, including applied jobs.
+   * @param {string} username - Username of the user to retrieve information for.
+   * @returns {object} - User information, including applied jobs.
+   * @throws {NotFoundError} - Thrown if no user with the provided username is found.
+   */
 
   static async get(username) {
     const userRes = await db.query(
@@ -135,7 +135,7 @@ class User {
     );
 
     const userAppJobs = await db.query(
-      `SELECT app.job_id AS "jobId" 
+      `SELECT app.job_id
         FROM users AS u 
         JOIN applications AS app
         ON u.username=app.username
@@ -143,11 +143,13 @@ class User {
       [username]
     );
 
+    const applications = userAppJobs.rows.map((row) => row.job_id);
+
     const user = userRes.rows[0];
 
     if (!user) throw new NotFoundError(`No user: ${username}`);
 
-    return { user, jobs: userAppJobs.rows };
+    return { user: { ...user, applications } };
   }
 
   /** Update user data with `data`.
